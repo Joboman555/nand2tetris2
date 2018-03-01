@@ -45,6 +45,14 @@ def write_code(fname, parsed_commands):
                 for l in write_eq():
                     writeline(f, l)
                 writeline(f, '')
+            elif command.command_type == 'C_GT':
+                for l in write_gt():
+                    writeline(f, l)
+                writeline(f, '')
+            elif command.command_type == 'C_LT':
+                for l in write_lt():
+                    writeline(f, l)
+                writeline(f, '')
             # ---- Virtual Memory Commands ----
             elif command.command_type == 'C_PUSH':
                 for l in write_push(command.arg1, command.arg2):
@@ -70,7 +78,22 @@ def write_neg():
 
 
 def write_eq():
-    """Pop 2 items off the stack, subtract them, push the result back on"""
+    """Pop 2 items off the stack, push value of (topval==bottomval) back on"""
+    return write_cmp('EQ')
+
+
+def write_gt():
+    """Pop 2 items off the stack, push value of (topval>bottomval) back on"""
+    return write_cmp('GT')
+
+
+def write_lt():
+    """Pop 2 items off the stack, push value of (topval<bottomval) back on"""
+    return write_cmp('LT')
+
+
+def write_cmp(jump_type):
+    """Pop 2 items off the stack, compare them, push the result back on"""
     # pop an item off the stack
     # D = M
     # pop another item off the stack
@@ -80,11 +103,13 @@ def write_eq():
     # (FALSE_0)
     #   D = 0
     #   @END_0
-    #   0; JMP
+    #   0; jump_type
     # (TRUE_0)
     #   D = 1
     # (END_0)
     #   push()
+    if jump_type not in ['EQ', 'GT', 'LT', 'GE', 'LE', 'NE']:
+        raise Exception("Unexpected Jump Type: {0}")
     true_label = unique("TRUE")
     false_label = unique("FALSE")
     end_label = unique("END")
@@ -93,7 +118,7 @@ def write_eq():
             pop() +
             ['D=D-M',
              at(true_label),
-             'D;JEQ',
+             'D;J{0}'.format(jump_type),
              '({0})'.format(false_label),
              'D=0',
              at(end_label),
