@@ -1,5 +1,5 @@
 # Writes assembly code given a list of parsed commands
-from os.path import splitext
+from os.path import splitext, basename
 from StackArithmeticWriter import (write_add, write_sub, write_and, write_or,
                                    write_neg, write_not, write_eq, write_gt,
                                    write_lt)
@@ -27,6 +27,8 @@ def writeline(file, line):
 
 def write_code(fname, parsed_commands):
     output_fname = splitext(fname)[0] + '.asm'
+    # title of file will be used for labels
+    ftitle = splitext(basename(fname))[0]
     print "Writing assembly code to {0} ...".format(output_fname)
     with open(output_fname, 'w') as f:
         for command in parsed_commands:
@@ -71,20 +73,20 @@ def write_code(fname, parsed_commands):
                 writeline(f, '')
             # ---- Virtual Memory Commands ----
             elif command.command_type == 'C_PUSH':
-                for l in write_push(command.arg1, command.arg2):
+                for l in write_push(command.arg1, command.arg2, ftitle=ftitle):
                     writeline(f, l)
                 writeline(f, '')
             elif command.command_type == 'C_POP':
-                for l in write_pop(command.arg1, command.arg2):
+                for l in write_pop(command.arg1, command.arg2, ftitle=ftitle):
                     writeline(f, l)
                 writeline(f, '')
-            # else:
-            #     raise Exception('Invalid Command Type: ' + command.command_type)
+            else:
+                raise Exception('Invalid Command Type: ' + command.command_type)
 
 # ---- Virtual Memory Helpers ----
 
 
-def write_push(segment, i):
+def write_push(segment, i, ftitle=None):
     """Push value i from a segment onto the stack"""
     # local, argument, this, and that are implemented the same way
     standard_segs = {
@@ -110,13 +112,16 @@ def write_push(segment, i):
                  "A=D",
                  "D=M"] +
                 push())
+    elif segment == "static":
+        label = "{0}.{1}".format(ftitle, i)
+        return [at(label), "D=M"] + push()
     elif segment == "constant":
         return [at(i), "D=A"] + push()
     return []
     raise Exception("{0} segment type not implemented yet".format(segment))
 
 
-def write_pop(segment, i):
+def write_pop(segment, i, ftitle=None):
     """Pop a value from the stack and store it at position i in segment"""
     # local, argument, this, and that are implemented the same way
     standard_segs = {
@@ -150,6 +155,9 @@ def write_pop(segment, i):
                  at('addr'),  # *addr=*SP
                  "A=M",
                  "M=D"])
+    elif segment == "static":
+        label = "{0}.{1}".format(ftitle, i)
+        return pop() + ["D=M", at(label), "M=D"]
     return []
     # raise Exception("{0} segment type not implemented yet".format(segment))
 
