@@ -41,6 +41,10 @@ def write_code(fname, parsed_commands):
                 for l in write_neg():
                     writeline(f, l)
                 writeline(f, '')
+            elif command.command_type == 'C_EQ':
+                for l in write_eq():
+                    writeline(f, l)
+                writeline(f, '')
             # ---- Virtual Memory Commands ----
             elif command.command_type == 'C_PUSH':
                 for l in write_push(command.arg1, command.arg2):
@@ -65,24 +69,39 @@ def write_neg():
     return pop() + ['D=-M'] + push()
 
 
-# def write_eq():
-#     """Pop 2 items off the stack, subtract them, push the result back on"""
-#     # pop an item off the stack
-#     # D = M
-#     # pop another item off the stack
-#     # D = D - M
-#     # @TRUE_0
-#     # 0: JEQ
-#     # (TRUE_0)
-#     #   D = 1
-#     #   @END_0
-#     #   0: JMP
-#     # (FALSE_0)
-#     #   D = 0
-#     # (END_0)
-#     #   push()
-#     return pop() + ['D=M'] + pop() + ['D=D-M', '@0', '0:JEQ', '@1', 'D=A'] + push()
-
+def write_eq():
+    """Pop 2 items off the stack, subtract them, push the result back on"""
+    # pop an item off the stack
+    # D = M
+    # pop another item off the stack
+    # D = D - M
+    # @TRUE_0
+    # D; JEQ
+    # (FALSE_0)
+    #   D = 0
+    #   @END_0
+    #   0; JMP
+    # (TRUE_0)
+    #   D = 1
+    # (END_0)
+    #   push()
+    true_label = unique("TRUE")
+    false_label = unique("FALSE")
+    end_label = unique("END")
+    return (pop() +
+            ['D=M'] +
+            pop() +
+            ['D=D-M',
+             at(true_label),
+             'D;JEQ',
+             '({0})'.format(false_label),
+             'D=0',
+             at(end_label),
+             '0;JMP',
+             '({0})'.format(true_label),
+             'D=1',
+             '({0})'.format(end_label)] +
+            push())
 
 # ---- Virtual Memory Helpers ----
 
@@ -91,7 +110,7 @@ def write_push(segment, i):
     """Push value i from a segment onto the stack"""
     if segment == "constant":
         return ["@{0}".format(i), "D=A"] + push()
-    return ["pushing {0} onto {1}".format(i, segment)]
+    raise Exception("{0} segment type not implemented yet".format(segment))
 
 # ---- Helpers ----
 
@@ -114,3 +133,17 @@ def push():
         '@SP',
         'M=M+1'
     ]
+
+occurances = {}
+def unique(label):
+    """creates a unique label from a non-unique label"""
+    if label not in occurances:
+        occurances[label] = 0
+    else:
+        occurances[label] = occurances[label] + 1
+    return "{0}_{1}".format(label, occurances[label])
+
+
+def at(label):
+    """appends an @ to a label"""
+    return "@{0}".format(label)
