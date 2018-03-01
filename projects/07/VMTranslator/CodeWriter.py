@@ -1,5 +1,9 @@
 # Writes assembly code given a list of parsed commands
 from os.path import splitext
+from StackArithmeticWriter import (write_add, write_sub, write_and, write_or,
+                                   write_neg, write_not, write_eq, write_gt,
+                                   write_lt)
+from WritingHelpers import push
 
 # command_types = {
 #     "add": "C_ADD",
@@ -73,90 +77,6 @@ def write_code(fname, parsed_commands):
             else:
                 raise Exception('Invalid Command Type: ' + command_type)
 
-# ---- Stack Arithmetic Helpers ----
-
-
-def write_add():
-    """Pop 2 items off the stack, add them, push the result back on"""
-    return pop() + ['D=M'] + pop() + ['D=D+M'] + push()
-
-
-def write_sub():
-    """Pop 2 items off the stack, sub bot from top, push the result back on"""
-    return pop() + ['D=M'] + pop() + ['D=M-D'] + push()
-
-
-def write_and():
-    """Pop 2 items off the stack, and them, push the result back on"""
-    return pop() + ['D=M'] + pop() + ['D=D&M'] + push()
-
-
-def write_or():
-    """Pop 2 items off the stack, or them, push the result back on"""
-    return pop() + ['D=M'] + pop() + ['D=D|M'] + push()
-
-
-def write_neg():
-    """Pop 1 item off the stack, negate it, push the result back on"""
-    return pop() + ['D=-M'] + push()
-
-
-def write_not():
-    """Pop 1 item off the stack, negate it, push the result back on"""
-    return pop() + ['D=!M'] + push()
-
-
-def write_eq():
-    """Pop 2 items off the stack, push value of (bottomval==topval) back on"""
-    return write_cmp('EQ')
-
-
-def write_gt():
-    """Pop 2 items off the stack, push value of (bottomval>topval) back on"""
-    return write_cmp('GT')
-
-
-def write_lt():
-    """Pop 2 items off the stack, push value of (bottomval<topval) back on"""
-    return write_cmp('LT')
-
-
-def write_cmp(jump_type):
-    """Pop 2 items off the stack, compare them, push the result back on"""
-    # pop an item off the stack
-    # D = M
-    # pop another item off the stack
-    # D = D - M
-    # @TRUE_0
-    # D; JEQ
-    # (FALSE_0)
-    #   D = 0
-    #   @END_0
-    #   0; jump_type
-    # (TRUE_0)
-    #   D = 1
-    # (END_0)
-    #   push()
-    if jump_type not in ['EQ', 'GT', 'LT', 'GE', 'LE', 'NE']:
-        raise Exception("Unexpected Jump Type: {0}")
-    true_label = unique("TRUE")
-    false_label = unique("FALSE")
-    end_label = unique("END")
-    return (pop() +
-            ['D=M'] +
-            pop() +
-            ['D=M-D',
-             at(true_label),
-             'D;J{0}'.format(jump_type),
-             '({0})'.format(false_label),
-             'D=0',
-             at(end_label),
-             '0;JMP',
-             '({0})'.format(true_label),
-             'D=-1',  # -1 == 11111...11 in 2's complement
-             '({0})'.format(end_label)] +
-            push())
-
 # ---- Virtual Memory Helpers ----
 
 
@@ -167,37 +87,3 @@ def write_push(segment, i):
     raise Exception("{0} segment type not implemented yet".format(segment))
 
 # ---- Helpers ----
-
-
-def pop():
-    """Pop an item off the stack and leaves value in M"""
-    return [
-        '@SP',
-        'M=M-1',
-        'A=M',
-    ]
-
-
-def push():
-    """Push a value stored at D onto the stack"""
-    return [
-        '@SP',
-        'A=M',
-        'M=D',
-        '@SP',
-        'M=M+1'
-    ]
-
-occurances = {}
-def unique(label):
-    """creates a unique label from a non-unique label"""
-    if label not in occurances:
-        occurances[label] = 0
-    else:
-        occurances[label] = occurances[label] + 1
-    return "{0}_{1}".format(label, occurances[label])
-
-
-def at(label):
-    """appends an @ to a label"""
-    return "@{0}".format(label)
