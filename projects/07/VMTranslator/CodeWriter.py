@@ -37,8 +37,20 @@ def write_code(fname, parsed_commands):
                 for l in write_sub():
                     writeline(f, l)
                 writeline(f, '')
+            elif command.command_type == 'C_AND':
+                for l in write_and():
+                    writeline(f, l)
+                writeline(f, '')
+            elif command.command_type == 'C_OR':
+                for l in write_or():
+                    writeline(f, l)
+                writeline(f, '')
             elif command.command_type == 'C_NEG':
                 for l in write_neg():
+                    writeline(f, l)
+                writeline(f, '')
+            elif command.command_type == 'C_NOT':
+                for l in write_not():
                     writeline(f, l)
                 writeline(f, '')
             elif command.command_type == 'C_EQ':
@@ -58,6 +70,8 @@ def write_code(fname, parsed_commands):
                 for l in write_push(command.arg1, command.arg2):
                     writeline(f, l)
                 writeline(f, '')
+            else:
+                raise Exception('Invalid Command Type: ' + command_type)
 
 # ---- Stack Arithmetic Helpers ----
 
@@ -68,8 +82,18 @@ def write_add():
 
 
 def write_sub():
-    """Pop 2 items off the stack, subtract them, push the result back on"""
-    return pop() + ['D=M'] + pop() + ['D=D-M'] + push()
+    """Pop 2 items off the stack, sub bot from top, push the result back on"""
+    return pop() + ['D=M'] + pop() + ['D=M-D'] + push()
+
+
+def write_and():
+    """Pop 2 items off the stack, and them, push the result back on"""
+    return pop() + ['D=M'] + pop() + ['D=D&M'] + push()
+
+
+def write_or():
+    """Pop 2 items off the stack, or them, push the result back on"""
+    return pop() + ['D=M'] + pop() + ['D=D|M'] + push()
 
 
 def write_neg():
@@ -77,18 +101,23 @@ def write_neg():
     return pop() + ['D=-M'] + push()
 
 
+def write_not():
+    """Pop 1 item off the stack, negate it, push the result back on"""
+    return pop() + ['D=!M'] + push()
+
+
 def write_eq():
-    """Pop 2 items off the stack, push value of (topval==bottomval) back on"""
+    """Pop 2 items off the stack, push value of (bottomval==topval) back on"""
     return write_cmp('EQ')
 
 
 def write_gt():
-    """Pop 2 items off the stack, push value of (topval>bottomval) back on"""
+    """Pop 2 items off the stack, push value of (bottomval>topval) back on"""
     return write_cmp('GT')
 
 
 def write_lt():
-    """Pop 2 items off the stack, push value of (topval<bottomval) back on"""
+    """Pop 2 items off the stack, push value of (bottomval<topval) back on"""
     return write_cmp('LT')
 
 
@@ -116,7 +145,7 @@ def write_cmp(jump_type):
     return (pop() +
             ['D=M'] +
             pop() +
-            ['D=D-M',
+            ['D=M-D',
              at(true_label),
              'D;J{0}'.format(jump_type),
              '({0})'.format(false_label),
@@ -124,7 +153,7 @@ def write_cmp(jump_type):
              at(end_label),
              '0;JMP',
              '({0})'.format(true_label),
-             'D=1',
+             'D=-1',  # -1 == 11111...11 in 2's complement
              '({0})'.format(end_label)] +
             push())
 
