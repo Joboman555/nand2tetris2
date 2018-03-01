@@ -3,7 +3,7 @@ from os.path import splitext
 from StackArithmeticWriter import (write_add, write_sub, write_and, write_or,
                                    write_neg, write_not, write_eq, write_gt,
                                    write_lt)
-from WritingHelpers import push
+from WritingHelpers import push, pop, at
 
 # command_types = {
 #     "add": "C_ADD",
@@ -74,16 +74,83 @@ def write_code(fname, parsed_commands):
                 for l in write_push(command.arg1, command.arg2):
                     writeline(f, l)
                 writeline(f, '')
-            else:
-                raise Exception('Invalid Command Type: ' + command_type)
+            elif command.command_type == 'C_POP':
+                for l in write_pop(command.arg1, command.arg2):
+                    writeline(f, l)
+                writeline(f, '')
+            # else:
+            #     raise Exception('Invalid Command Type: ' + command.command_type)
 
 # ---- Virtual Memory Helpers ----
 
 
 def write_push(segment, i):
     """Push value i from a segment onto the stack"""
-    if segment == "constant":
-        return ["@{0}".format(i), "D=A"] + push()
+    # local, argument, this, and that are implemented the same way
+    standard_segs = {
+        "local": "LCL",
+        "argument": "ARG",
+        "this": "THIS",
+        "that": "THAT",
+    }
+    if segment in standard_segs:
+        segname = standard_segs[segment]
+        return ([at(segname),  # addr=segname+i
+                 "D=M",
+                 at(i),
+                 "D=D+A",
+                 "A=D",
+                 "D=M"] +
+                push())
+    elif segment == "temp":
+        return ([at(5),  # temp base address is 5
+                 "D=A",
+                 at(i),
+                 "D=D+A",
+                 "A=D",
+                 "D=M"] +
+                push())
+    elif segment == "constant":
+        return [at(i), "D=A"] + push()
+    return []
     raise Exception("{0} segment type not implemented yet".format(segment))
+
+
+def write_pop(segment, i):
+    """Pop a value from the stack and store it at position i in segment"""
+    # local, argument, this, and that are implemented the same way
+    standard_segs = {
+        "local": "LCL",
+        "argument": "ARG",
+        "this": "THIS",
+        "that": "THAT",
+    }
+    if segment in standard_segs:
+        segname = standard_segs[segment]
+        return ([at(segname),  # addr=segname+i
+                 "D=M",
+                 at(i),
+                 "D=D+A",
+                 at('addr'),
+                 "M=D"] +
+                pop() +
+                ["D=M",
+                 at('addr'),  # *addr=*SP
+                 "A=M",
+                 "M=D"])
+    elif segment == "temp":
+        return ([at(5),  # temp base address is 5
+                 "D=A",
+                 at(i),
+                 "D=D+A",
+                 at('addr'),
+                 "M=D"] +
+                pop() +
+                ["D=M",
+                 at('addr'),  # *addr=*SP
+                 "A=M",
+                 "M=D"])
+    return []
+    # raise Exception("{0} segment type not implemented yet".format(segment))
 
 # ---- Helpers ----
