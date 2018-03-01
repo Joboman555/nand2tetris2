@@ -15,7 +15,7 @@ command_types = {
     "and": "C_AND",
     "or": "C_OR",
     "not": "C_NOT",
-    "pop": "C_PUSH",
+    "pop": "C_POP",
     "push": "C_PUSH"
 }
 

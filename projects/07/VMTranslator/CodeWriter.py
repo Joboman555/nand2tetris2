@@ -11,9 +11,14 @@ from os.path import splitext
 #     "and": "C_AND",
 #     "or": "C_OR",
 #     "not": "C_NOT",
-#     "pop": "C_PUSH",
+#     "pop": "C_POP",
 #     "push": "C_PUSH"
 # }
+
+
+def writeline(file, line):
+    """Writes a new line to a file"""
+    file.write(line + '\n')
 
 
 def write_code(fname, parsed_commands):
@@ -22,23 +27,27 @@ def write_code(fname, parsed_commands):
     with open(output_fname, 'w') as f:
         for command in parsed_commands:
             # Display the original line as a comment
-            f.write("// " + command.original_line + '\n')
+            writeline(f, "// " + command.original_line)
+            # ---- Stack Arithmetic Commands ----
             if command.command_type == 'C_ADD':
                 for l in write_add():
-                    f.write(l + '\n')
-                f.write('\n')
+                    writeline(f, l)
+                writeline(f, '')
             elif command.command_type == 'C_SUB':
                 for l in write_sub():
-                    f.write(l + '\n')
-                f.write('\n')
+                    writeline(f, l)
+                writeline(f, '')
             elif command.command_type == 'C_NEG':
                 for l in write_neg():
-                    f.write(l + '\n')
-                f.write('\n')
-            # elif command.command_type == 'C_NEG':
-            #     for l in write_eq():
-            #         f.write(l + '\n')
-            #     f.write('\n')
+                    writeline(f, l)
+                writeline(f, '')
+            # ---- Virtual Memory Commands ----
+            elif command.command_type == 'C_PUSH':
+                for l in write_push(command.arg1, command.arg2):
+                    writeline(f, l)
+                writeline(f, '')
+
+# ---- Stack Arithmetic Helpers ----
 
 
 def write_add():
@@ -73,6 +82,18 @@ def write_neg():
 #     # (END_0)
 #     #   push()
 #     return pop() + ['D=M'] + pop() + ['D=D-M', '@0', '0:JEQ', '@1', 'D=A'] + push()
+
+
+# ---- Virtual Memory Helpers ----
+
+
+def write_push(segment, i):
+    """Push value i from a segment onto the stack"""
+    if segment == "constant":
+        return ["@{0}".format(i), "D=A"] + push()
+    return ["pushing {0} onto {1}".format(i, segment)]
+
+# ---- Helpers ----
 
 
 def pop():
