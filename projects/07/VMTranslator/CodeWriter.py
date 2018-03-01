@@ -115,9 +115,19 @@ def write_push(segment, i, ftitle=None):
     elif segment == "static":
         label = "{0}.{1}".format(ftitle, i)
         return [at(label), "D=M"] + push()
+    elif segment == "pointer":
+        if int(i) not in [0, 1]:
+            raise Exception('Invalid i for push pointer: ' + str(i))
+        target = "THAT" if int(i) else "THIS"
+        return [at(target),  # *SP = THIS/THAT
+                "D=M",
+                "@SP",
+                "A=M",
+                "M=D",
+                "@SP",  # SP++
+                "M=M+1"]
     elif segment == "constant":
         return [at(i), "D=A"] + push()
-    return []
     raise Exception("{0} segment type not implemented yet".format(segment))
 
 
@@ -158,7 +168,14 @@ def write_pop(segment, i, ftitle=None):
     elif segment == "static":
         label = "{0}.{1}".format(ftitle, i)
         return pop() + ["D=M", at(label), "M=D"]
-    return []
-    # raise Exception("{0} segment type not implemented yet".format(segment))
-
-# ---- Helpers ----
+    elif segment == "pointer":
+        if int(i) not in [0, 1]:
+            raise Exception('Invalid i for pop pointer: ' + str(i))
+        target = "THAT" if int(i) else "THIS"
+        return ["@SP",  # SP--
+                "M=M-1",
+                "A=M",  # THIS/THAT = *SP
+                "D=M",
+                at(target),
+                "M=D"]
+    raise Exception("{0} segment type not implemented yet".format(segment))
