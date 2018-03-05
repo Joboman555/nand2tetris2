@@ -7,7 +7,7 @@ def write_label(label):
 
 
 def write_goto(label):
-    return []
+    return [at(label), "0; JMP"]
 
 
 def write_if_goto(label):
