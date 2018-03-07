@@ -20,6 +20,9 @@ command_types = {
     "label": "C_LABEL",
     "goto": "C_GOTO",
     "if-goto": "C_IF_GOTO",
+    "function": "C_FUNCTION",
+    "return": "C_RETURN",
+    "call": "C_CALL",
 }
 
 

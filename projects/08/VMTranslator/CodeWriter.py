@@ -5,6 +5,7 @@ from StackArithmeticWriter import (write_add, write_sub, write_and, write_or,
                                    write_lt)
 from VirtualMemoryWriter import write_push, write_pop
 from ControlFlowWriter import write_label, write_goto, write_if_goto
+from FunctionWriter import write_function, write_return, write_call
 
 
 def writeline(file, line):
@@ -53,6 +54,13 @@ def write_code(fname, parsed_commands):
                 output = write_goto(command.arg1)
             elif command.command_type == 'C_IF_GOTO':
                 output = write_if_goto(command.arg1)
+            # ---- Function Commands ----
+            elif command.command_type == 'C_FUNCTION':
+                output = write_function(command.arg1, command.arg2)
+            elif command.command_type == 'C_RETURN':
+                output = write_return()
+            elif command.command_type == 'C_CALL':
+                output = write_call(command.arg1, command.arg2)
             else:
                 raise Exception('Invalid Command Type: ' + command.command_type)
             for line in output:
