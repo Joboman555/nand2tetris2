@@ -33,6 +33,11 @@ if len(sys.argv) == 2:
             if fname.endswith('.vm'):
                 parsed_commands = parse(path+fname)
                 write_code(path+fname, parsed_commands, outfile)
+    else:
+        output_fname = splitext(path)[0] + '.asm'
+        write_header(output_fname)
+        parsed_commands = parse(path)
+        write_code(path, parsed_commands)
 elif len(sys.argv) == 1:
     print "Please specify a .vm file or directory to translate."
 else:
