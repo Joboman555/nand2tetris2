@@ -23,7 +23,7 @@ A=M
 M=D
 
 // label LOOP_START
-(BasicLoop.LOOP_START)
+(BasicLoop$LOOP_START)
 
 // push argument 0
 @ARG
@@ -151,7 +151,7 @@ M=M+1
 M=M-1
 A=M
 D=M
-@BasicLoop.LOOP_START
+@BasicLoop$LOOP_START
 D; JNE
 
 // push local 0
