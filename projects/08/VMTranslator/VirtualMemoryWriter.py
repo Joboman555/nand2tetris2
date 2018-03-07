@@ -2,7 +2,7 @@
 from WritingHelpers import push, pop, at
 
 
-def write_push(segment, i, ftitle=None):
+def write_push(segment, i, ftitle):
     """Push value i from a segment onto the stack"""
     # local, argument, this, and that are implemented the same way
     standard_segs = {
@@ -47,7 +47,7 @@ def write_push(segment, i, ftitle=None):
     raise Exception("{0} segment type not implemented yet".format(segment))
 
 
-def write_pop(segment, i, ftitle=None):
+def write_pop(segment, i, ftitle):
     """Pop a value from the stack and store it at position i in segment"""
     # local, argument, this, and that are implemented the same way
     standard_segs = {

@@ -50,17 +50,30 @@ def write_return():
     return output
 
 
-def write_call(func_name, num_args):
+def write_call(func_name, num_args, curr_func, num_calls):
+    return_label = "{0}$ret.{1}".format(curr_func, num_calls)
     # push returnLabel
+    output = [at(return_label), "D=A"] + push()
     # push LCL
+    output += [at("LCL"), "D=M"] + push()
     # push ARG
+    output += [at("ARG"), "D=M"] + push()
     # push THIS
+    output += [at("THIS"), "D=M"] + push()
     # push THAT
+    output += [at("THAT"), "D=M"] + push()
     # ARG=SP-5-nArgs
+    output += [at("SP"), "D=M-1"]
+    for i in range(3+int(num_args)):
+        output.append("D=D-1")
+    output += [at("ARG"), "M=D-1"]
     # LCL=SP
+    output += [at("SP"), "D=M", at("LCL"), "M=D"]
     # goto functionName
+    output += [at(func_name), "0;JMP"]
     # (returnLabel)
-    return []
+    output.append("({0})".format(return_label))
+    return output
 
 # ---- helpers ----
 
