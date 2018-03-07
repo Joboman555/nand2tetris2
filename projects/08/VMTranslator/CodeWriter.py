@@ -18,6 +18,9 @@ def write_code(fname, parsed_commands):
     # title of file will be used for labels
     ftitle = splitext(basename(fname))[0]
     print "Writing assembly code to {0}".format(output_fname)
+    # keep track of the current function as a stack
+    # if no function is currently being used, use just ftitle
+    curr_func = [ftitle]
     with open(output_fname, 'a') as f:
         for command in parsed_commands:
             # Display the original line as a comment
@@ -49,20 +52,22 @@ def write_code(fname, parsed_commands):
                 output = write_pop(command.arg1, command.arg2, ftitle=ftitle)
             # ---- Control Flow Commands ----
             elif command.command_type == 'C_LABEL':
-                output = write_label(command.arg1)
+                output = write_label(command.arg1, curr_func[-1])
             elif command.command_type == 'C_GOTO':
-                output = write_goto(command.arg1)
+                output = write_goto(command.arg1, curr_func[-1])
             elif command.command_type == 'C_IF_GOTO':
-                output = write_if_goto(command.arg1)
+                output = write_if_goto(command.arg1, curr_func[-1])
             # ---- Function Commands ----
             elif command.command_type == 'C_FUNCTION':
-                output = write_function(command.arg1, command.arg2)
+                curr_func.append("({0}.{1})".format(ftitle, command.arg1))
+                output = write_function(command.arg1, command.arg2, ftitle)
             elif command.command_type == 'C_RETURN':
+                curr_func.pop()
                 output = write_return()
             elif command.command_type == 'C_CALL':
                 output = write_call(command.arg1, command.arg2)
             else:
-                raise Exception('Invalid Command Type: ' + command.command_type)
+                raise Exception('Invalid Command Type: '+command.command_type)
             for line in output:
                 writeline(f, line)
             writeline(f, '')

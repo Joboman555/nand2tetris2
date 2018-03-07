@@ -3,8 +3,8 @@ from WritingHelpers import push, pop, at
 from StackArithmeticWriter import write_sub
 
 
-def write_function(func_name, num_vars):
-    output = ["({0})".format(func_name)]
+def write_function(func_name, num_vars, ftitle):
+    output = ["({0}.{1})".format(ftitle, func_name)]
     for i in range(int(num_vars)):
         output += ["D=0"] + push()
     return output
@@ -51,6 +51,15 @@ def write_return():
 
 
 def write_call(func_name, num_args):
+    # push returnLabel
+    # push LCL
+    # push ARG
+    # push THIS
+    # push THAT
+    # ARG=SP-5-nArgs
+    # LCL=SP
+    # goto functionName
+    # (returnLabel)
     return []
 
 # ---- helpers ----
