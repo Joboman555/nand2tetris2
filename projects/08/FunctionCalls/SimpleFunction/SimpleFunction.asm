@@ -126,44 +126,6 @@ M=M+1
 D=M
 @endFrame
 M=D
-// retAddr = *(endFrame - 5)
-@endFrame
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@5
-D=A
-// push
-@SP
-A=M
-M=D
-@SP
-M=M+1
-// write_sub
-@SP
-M=M-1
-A=M
-D=M
-@SP
-M=M-1
-A=M
-D=M-D
-@SP
-A=M
-M=D
-@SP
-M=M+1
-// pop
-@SP
-M=M-1
-A=M
-A=M
-D=M
-@retAddr
-M=D
 // *ARG = pop()
 @SP
 M=M-1
@@ -205,7 +167,9 @@ A=M
 D=M
 @LCL
 M=D
-@retAddr
-A=D
+// endFrame-=1, goto endFrame
+@endFrame
+M=M-1
+A=M
 0; JMP
 
