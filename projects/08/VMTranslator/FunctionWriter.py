@@ -12,17 +12,20 @@ def write_function(func_name, num_vars, ftitle):
 
 def write_return():
     # endFrame = LCL
+    # retAddr = *(endFrame-5)
     # *ARG = pop(), sets return value to arg[0]
     # SP = ARG+1
     # endFrame -=1, THAT = *(endFrame)
     # endFrame -=1, THIS = *(endFrame)
     # endFrame -=1, ARG = *(endFrame)
     # endFrame -=1, LCL = *(endFrame)
-    # endFrame -=1, goto endFrame
+    # goto retAddr
 
     # ---- implementation ----
     # endFrame = LCL
     output = [at("LCL"), "D=M", at("endFrame"), "M=D"]
+    # retAddr = *(endFrame-5)
+    output += __write_save_retAddr()
     # *ARG = pop()
     output += (["// *ARG = pop()"] +
                pop() +
@@ -41,13 +44,11 @@ def write_return():
     output += __write_restore("THIS")
     output += __write_restore("ARG")
     output += __write_restore("LCL")
-    # endFrame -=1, goto endFrame
-    output += ["// endFrame-=1, goto endFrame",
-               "@endFrame",
-               "M=M-1",
+    # goto retAddr
+    output += ["// goto retAddr",
+               "@retAddr",
                "A=M",
-               "A=M",
-               "0; JMP"]
+               "0;JMP"]
     return output
 
 
@@ -77,6 +78,23 @@ def write_call(func_name, num_args, curr_func, num_calls):
     return output
 
 # ---- helpers ----
+
+
+def __write_save_retAddr():
+    """Saves the return address in a local variable. """
+    return (["// retAddr = *(endFrame - 5)",
+             at("endFrame"),
+             "D=M"] +
+            push() +
+            [at(5),
+             "D=A", "// push"] +
+            push() + ["// write_sub"] +
+            write_sub() + ["// pop"] +
+            pop() +
+            ["A=M",
+             "D=M",
+             at("retAddr"),
+             "M=D"])
 
 
 def __write_restore(var):
