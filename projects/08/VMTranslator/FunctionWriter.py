@@ -3,8 +3,8 @@ from WritingHelpers import push, pop, at
 from StackArithmeticWriter import write_sub
 
 
-def write_function(func_name, num_vars, ftitle):
-    output = ["({0}.{1})".format(ftitle, func_name)]
+def write_function(func_name, num_vars):
+    output = ["({0})".format(func_name)]
     for i in range(int(num_vars)):
         output += ["D=0"] + push()
     return output

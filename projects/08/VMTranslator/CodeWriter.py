@@ -20,7 +20,7 @@ def write_code(fname, parsed_commands, outfile=None):
     print "Writing assembly code to {0}".format(output_fname)
     # keep track of the current function
     # if no function is currently being used, use just ftitle
-    curr_func = ftitle+'.'
+    curr_func = ftitle
     num_calls = 0
     with open(output_fname, 'a') as f:
         for command in parsed_commands:
@@ -60,15 +60,14 @@ def write_code(fname, parsed_commands, outfile=None):
                 output = write_if_goto(command.arg1, curr_func)
             # ---- Function Commands ----
             elif command.command_type == 'C_FUNCTION':
-                curr_func = "{0}.{1}".format(ftitle, command.arg1)
+                curr_func = command.arg1
                 num_calls = 0
-                output = write_function(command.arg1, command.arg2, ftitle)
+                output = write_function(command.arg1, command.arg2)
             elif command.command_type == 'C_RETURN':
                 output = write_return()
             elif command.command_type == 'C_CALL':
                 num_calls += 1
-                func_name = "{0}.{1}".format(ftitle, command.arg1)
-                output = write_call(func_name, command.arg2, curr_func, num_calls)
+                output = write_call(command.arg1, command.arg2, curr_func, num_calls)
             else:
                 raise Exception('Invalid Command Type: '+command.command_type)
             for line in output:
