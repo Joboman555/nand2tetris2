@@ -46,6 +46,7 @@ def write_return():
                "@endFrame",
                "M=M-1",
                "A=M",
+               "A=M",
                "0; JMP"]
     return output
 
