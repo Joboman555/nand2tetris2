@@ -23,6 +23,7 @@ def write_code(fname, parsed_commands, outfile=None):
     curr_func = ftitle
     num_calls = 0
     with open(output_fname, 'a') as f:
+        writeline(f, '// --------- {0} --------'.format(basename(fname)))
         for command in parsed_commands:
             # Display the original line as a comment
             writeline(f, "// " + command.original_line)

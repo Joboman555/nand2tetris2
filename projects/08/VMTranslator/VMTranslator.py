@@ -6,17 +6,20 @@ from Parser import parse
 from os.path import splitext, isdir
 from os import listdir
 from CodeWriter import write_code
+from FunctionWriter import write_call
 import sys
 
 
 def write_header(outfile):
     """Writes the header required at the beginnign of each assembly file."""
     print "Creating assembly file: {0}".format(outfile)
+    bootstrap = ['// -------- Boostrap ---------']
+    bootstrap += ['//SP=256', '@256', 'D=A', '@SP', 'M=D', '']
+    bootstrap += ['// call Sys.init'] + write_call('Sys.init', 0, 'Origin', 0) + ["@Origin.end", "0;JMP"]
     with open(outfile, 'w') as f:
-        # f.write('SP=256\n')
-        # f.write('call Sys.init\n')
-        # f.write('\n')
-        pass
+        for l in bootstrap:
+            f.write(l+'\n')
+        f.write('\n')
 
 if len(sys.argv) == 2:
     path = sys.argv[1]
