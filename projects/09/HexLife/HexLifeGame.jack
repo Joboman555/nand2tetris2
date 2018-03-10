@@ -1,0 +1,35 @@
+/** Implements the Game of HexLife
+  * Shows a grid of Hex tiles on the screen
+  * The four arrow keys + page up/down control which tile is selected
+  * right -> down right
+  * page down -> up right
+  * left -> down left
+  * page up -> up left
+  * up -> up
+  * down -> down
+  * Enter toggles color of current tile
+  * Space toggles the simulation to start/stop
+  */
+
+class HexLifeGame {
+    field Hexagon hexagon; // the single hexagon being displayed
+
+    constructor HexLifeGame new() {
+        // Creates a hexagon with width 16 centered at 100, 100
+        let hexagon = Hexagon.new(150, 150, 100);
+        return this;
+    }
+
+    method void dispose() {
+        do hexagon.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void run() {
+        while(true) {
+
+        }
+        return;
+    }
+}

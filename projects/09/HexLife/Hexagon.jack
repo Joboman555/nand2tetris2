@@ -1,0 +1,53 @@
+/** Implements a graphical hexagon
+  * oriented like this (except not slanted):
+  *     -----
+  *   /      \
+  *   \      /
+  *    -----
+  */
+class Hexagon {
+    field int x, y; // screen locations of center
+    field int d; // distance between opposite corners including border
+
+    constructor Hexagon new(int _x, int _y, int _width) {
+        let x = _x;
+        let y = _y;
+        let d = _width;
+        do draw(true);
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Draws either a black (true) or white (false) Hexagon */
+    method void draw(boolean color) {
+        var int h, i;
+        var int x0, y0;
+        // distance from center to top of hexagon. Approx d*sqrt(3)/4
+        let h = (d * 43) / 100;
+
+
+        // draw border
+        do Screen.setColor(true);
+
+        do Screen.drawLine(x-(d/2), y, x-(d/4), y-h);
+        do Screen.drawLine(x-(d/4), y-h, x+(d/4), y-h);
+        do Screen.drawLine(x+(d/4), y-h, x+(d/2), y);
+        do Screen.drawLine(x+(d/2), y, x+(d/4), y+h);
+        do Screen.drawLine(x+(d/4), y+h, x-(d/4), y+h);
+        do Screen.drawLine(x-(d/4), y+h, x-(d/2), y);
+
+        // fill inside
+        let i = 1;
+        while (i < (2*h)) {
+            let x0 = (((-i)*1000)/577) + (d/4);
+            let y0 = y-h-i;
+            do Screen.drawLine(x0, y0, x0+50, y0);
+            let i = i + 1;
+        }
+        return;
+    }
+}
