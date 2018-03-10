@@ -1,0 +1,39 @@
+/** Implements a graphical square */
+class Square {
+
+    field int x, y; // location of top left corner
+    field int size; // length of one side in pixels
+
+    constructor Square new(int _x, int _y, int _size) {
+        let x = _x;
+        let y = _y;
+        let size = _size;
+        do draw(false);
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Draws either a square.
+      * color=true => square is black
+      * color=false => square is white w/ black border
+      */
+    method void draw(boolean color) {
+        if (color) {
+            do Screen.setColor(color);
+            do Screen.drawRectangle(x, y, x + size, y + size);
+        }
+        else {
+            // draw border
+            do Screen.drawLine(x, y, x + size, y);
+            do Screen.drawLine(x + size, y, x + size, y + size);
+            do Screen.drawLine(x + size, y + size, x, y + size);
+            do Screen.drawLine(x, y + size, x, y);
+
+        }
+        return;
+    }
+}

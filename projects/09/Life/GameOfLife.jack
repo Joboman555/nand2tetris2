@@ -1,0 +1,28 @@
+/** Implements the Game of Life
+  * Shows a grid of squares on the screen
+  * The four arrow keys control which tile is selected
+  * Enter toggles color of current tile
+  * Space toggles the simulation to start/stop
+  */
+
+class GameOfLife {
+    field Square square;
+
+    constructor GameOfLife new() {
+        let square = Square.new(150, 150, 100);
+        return this;
+    }
+
+    method void dispose() {
+        do square.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void run() {
+        while(true) {
+
+        }
+        return;
+    }
+}
