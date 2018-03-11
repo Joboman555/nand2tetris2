@@ -6,15 +6,15 @@
   */
 
 class GameOfLife {
-    field Square square;
+    field Grid grid;
 
     constructor GameOfLife new() {
-        let square = Square.new(150, 150, 100);
+        let grid = Grid.new(10, 20, 25);
         return this;
     }
 
     method void dispose() {
-        do square.dispose();
+        do grid.dispose();
         do Memory.deAlloc(this);
         return;
     }

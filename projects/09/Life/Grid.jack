@@ -1,0 +1,44 @@
+/** Implements a grid of squares */
+class Grid {
+
+    field int rows, cols;
+    field Array squares;
+
+    constructor Grid new(int _rows, int _cols, int _size) {
+        var int r, c; // keep track of current row and column
+        var Array col; // used to build a column
+        let squares = Array.new(_rows);
+        let r = 0;
+        while (r < _rows) {
+            // initialize a row
+            let col = Array.new(_cols);
+            let c = 0;
+            while (c < _cols) {
+                let col[c] = Square.new(c*_size, r*_size, _size);
+                let c = c + 1;
+            }
+            let squares[r] = col;
+            let r = r + 1;
+        }
+        do select(0, 0);
+        return this;
+    }
+
+    method void dispose() {
+        do squares.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Selects the square at (r, c) */
+    method void select(int r, int c) {
+        var Array col;
+        var Square square;
+        let col = squares[r];
+        let square = col[c];
+        do square.select();
+        return;
+    }
+
+
+}

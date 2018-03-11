@@ -3,12 +3,14 @@ class Square {
 
     field int x, y; // location of top left corner
     field int size; // length of one side in pixels
+    field boolean selected;
+    field boolean color;
 
     constructor Square new(int _x, int _y, int _size) {
         let x = _x;
         let y = _y;
         let size = _size;
-        do draw(false);
+        do draw();
         return this;
     }
 
@@ -17,13 +19,16 @@ class Square {
         return;
     }
 
-    /** Draws either a square.
-      * color=true => square is black
-      * color=false => square is white w/ black border
-      */
-    method void draw(boolean color) {
+    /** Sets the color of the square (note: does not redraw) */
+    method void setColor(boolean _color) {
+        let color = _color;
+        return;
+    }
+
+    /** Draws a square */
+    method void draw() {
+        do Screen.setColor(true);
         if (color) {
-            do Screen.setColor(color);
             do Screen.drawRectangle(x, y, x + size, y + size);
         }
         else {
@@ -32,8 +37,38 @@ class Square {
             do Screen.drawLine(x + size, y, x + size, y + size);
             do Screen.drawLine(x + size, y + size, x, y + size);
             do Screen.drawLine(x, y + size, x, y);
+            // draw white rectangle inside
+            do Screen.setColor(false);
+            do Screen.drawRectangle(x+1,y+1,(x+size)-1,(y+size)-1);
 
         }
+        if (selected) {
+            // Draw an X in the middle
+            do Screen.setColor(~color);
+            do Screen.drawLine(x+(size/3), y+(size/3), x+((2*size)/3), y+((2*size)/3));
+            do Screen.drawLine(x+((2*size)/3), y+(size/3), x+(size/3), y+((2*size)/3));
+        }
+        return;
+    }
+
+    /** Erases the square from the screen. */
+    method void erase() {
+       do Screen.setColor(false);
+       do Screen.drawRectangle(x, y, x + size, y + size);
+       return;
+    }
+
+    /** Selects the square, putting an X over it */
+    method void select() {
+        let selected = true;
+        do draw();
+        return;
+    }
+
+    /** Deselects the square, putting an X over it */
+    method void deselect() {
+        let selected = false;
+        do draw();
         return;
     }
 }
